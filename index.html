@@ -29,21 +29,32 @@
             margin-top: 20px;
         }
         .day {
-            width: 60px;
-            height: 60px;
-            line-height: 60px;
+            width: 80px; /* Increased size */
+            height: 80px; /* Increased size */
+            line-height: 20px;
             border: 1px solid #ddd;
             background: #fff;
             cursor: pointer;
             text-align: center;
             font-weight: bold;
             border-radius: 5px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-size: 18px;
+            padding: 5px;
+            overflow: hidden;
         }
         .day:hover {
             background-color: #ddd;
         }
-        .selected {
-            background-color: lightblue;
+        .event-text {
+            font-size: 12px;
+            font-weight: normal;
+            color: #333;
+            margin-top: 5px;
+            word-wrap: break-word;
         }
         #eventModal {
             display: none;
@@ -55,12 +66,14 @@
             padding: 20px;
             box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
             border-radius: 10px;
+            width: 300px;
         }
         #eventModal input, #eventModal button {
             display: block;
-            width: 100%;
-            margin-top: 10px;
-            padding: 8px;
+            width: 90%; /* Adjusted so elements don't touch the edges */
+            margin: 10px auto;
+            padding: 10px;
+            font-size: 16px;
         }
     </style>
 </head>
@@ -93,7 +106,18 @@
                 const day = document.createElement("div");
                 day.classList.add("day");
                 day.textContent = i;
+                day.setAttribute("data-day", i); // Set data attribute to track date
                 day.addEventListener("click", () => openModal(i));
+
+                // Load saved event if it exists
+                let savedEvent = localStorage.getItem(`event-${i}`);
+                if (savedEvent) {
+                    let eventSpan = document.createElement("span");
+                    eventSpan.classList.add("event-text");
+                    eventSpan.textContent = savedEvent;
+                    day.appendChild(eventSpan);
+                }
+
                 calendar.appendChild(day);
             }
         }
@@ -107,8 +131,22 @@
 
         function saveEvent() {
             if (selectedDate) {
-                localStorage.setItem(`event-${selectedDate}`, eventInput.value);
-                alert(`Event saved for Day ${selectedDate}: ${eventInput.value}`);
+                let eventText = eventInput.value;
+                localStorage.setItem(`event-${selectedDate}`, eventText);
+
+                // Update the calendar box to show the event
+                let dayBox = document.querySelector(`[data-day="${selectedDate}"]`);
+                let eventSpan = dayBox.querySelector(".event-text");
+                
+                if (!eventSpan) {
+                    eventSpan = document.createElement("span");
+                    eventSpan.classList.add("event-text");
+                    dayBox.appendChild(eventSpan);
+                }
+
+                eventSpan.textContent = eventText; // Show event inside the calendar
+
+                alert(`Event saved for Day ${selectedDate}: ${eventText}`);
                 closeModal();
             }
         }
@@ -122,3 +160,4 @@
 
 </body>
 </html>
+
